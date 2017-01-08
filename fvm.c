@@ -42,13 +42,25 @@
 #define OP_CMPRI 0x22
 #define OP_CMPRR 0x23
 // 1000xxx
-#define OP_JMP 0x40
-#define OP_JEQ 0x41
-#define OP_JNE 0x42
-#define OP_JLT 0x43
-#define OP_JLE 0x44
-#define OP_JGT 0x45
-#define OP_JGE 0x46
+#define OP_JMPI 0x40
+#define OP_JMPR 0x41
+#define OP_JLTI 0x42
+#define OP_JLTR 0x43
+#define OP_JEQI 0x44
+#define OP_JEQR 0x45
+#define OP_JGTI 0x46
+#define OP_JGTR 0x47
+#define OP_JGEI 0x4a
+#define OP_JGER 0x4b
+#define OP_JNEI 0x4c
+#define OP_JNER 0x4d
+#define OP_JLEI 0x4e
+#define OP_JLER 0x4f
+// Stack
+#define OP_PUSHI 0x8
+#define OP_PUSHR 0x9
+#define OP_POPI 0x10
+#define OP_POPR 0x11
 
 #define OP_STOP 0x0
 
@@ -70,7 +82,8 @@ char data[MEM] = {
 };
 */
 
-char data[MEM] = {
+char data[MEM];
+/* = {
 	OP_MOVRI, 0, 10,
 	OP_STRI, 0, 100,
 	OP_SBRRI, 0, 0, 1,
@@ -80,7 +93,7 @@ char data[MEM] = {
 	OP_CMPRI, 0, 0,
 	OP_JNE, 6,
 	OP_STOP
-};
+};*/
 
 char registers[REG];
 
@@ -110,6 +123,7 @@ void vm_loop(){
     while((data[pc] != OP_STOP) && overload){
         printf(".");
         switch(data[pc]){
+// mov
             case OP_MOVRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];
@@ -264,6 +278,7 @@ void vm_loop(){
                 op[1] = data[++pc];
                 registers[op[0]] = data[registers[op[1]]];
                 break;
+// store
             case OP_STRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];
@@ -274,6 +289,23 @@ void vm_loop(){
                 op[1] = data[++pc];
                 data[registers[op[1]]] = registers[op[0]];
                 break;
+// push to stack
+            case OP_PUSHI:
+                op[0] = data[++pc];
+                data[registers[15]] = op[0];
+                --registers[15];
+                break;
+            case OP_PUSHR:
+                op[0] = data[++pc];
+                data[registers[15]] = registers[op[0]];
+                --registers[15];
+                break;
+// pop from stack
+            case OP_POPR:
+                op[0] = data[++pc];
+                registers[op[0]] = data[++registers[15]];
+                break;
+// compare
             case OP_CMPRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];
@@ -306,36 +338,37 @@ void vm_loop(){
                 else
                     flags.lt = 0;
                 break;
-            case OP_JMP:
+// goto
+            case OP_JMPI:
                 op[0] = data[++pc];
                 pc = op[0] - 1;
                 break;
-            case OP_JEQ:
+            case OP_JEQI:
                 op[0] = data[++pc];
                 if(flags.eq == 1)
                     pc = op[0] - 1;
                 break;
-            case OP_JNE:
+            case OP_JNEI:
                 op[0] = data[++pc];
                 if(flags.eq == 0)
                     pc = op[0] - 1;
                 break;
-            case OP_JLT:
+            case OP_JLTI:
                 op[0] = data[++pc];
                 if(flags.lt == 1)
                     pc = op[0] - 1;
                 break;
-            case OP_JGT:
+            case OP_JGTI:
                 op[0] = data[++pc];
                 if(flags.gt == 1)
                     pc = op[0] - 1;
                 break;
-            case OP_JLE:
+            case OP_JLEI:
                 op[0] = data[++pc];
                 if(flags.gt == 0)
                     pc = op[0] - 1;
                 break;
-            case OP_JGE:
+            case OP_JGEI:
                 op[0] = data[++pc];
                 if(flags.lt == 0)
                     pc = op[0] - 1;
@@ -361,6 +394,7 @@ int main(int argc, char *argv[]){
 	for(i = 0; i < REG; i++){
 		registers[i] = 0;
 	}
+    registers[REG-1] = MEM-1;
 	/* loading flash */
 	if(argc > 1){
         printf("Loading from %s\n", argv[1]);

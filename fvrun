@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# wrapper for fvm
+
+sed ':a;N;s/[ \n]/ /g;ba' $1 > $1.asm
+./fvm_asm $1.asm $1.bin
+./fvm $1.bin
+rm $1.*

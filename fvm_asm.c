@@ -8,6 +8,11 @@ struct cs_vector {
     unsigned int length;
 };
 
+struct {
+	unsigned char verbose:1;
+	unsigned char reserve:7;
+} options;
+
 char argument_type(char* s){
     if(s[0] == 'r')
         return 1;
@@ -26,9 +31,11 @@ char* assembler(char* source, int *len){
     char* out;
     out = (char*)malloc(256 * sizeof(char));
     tokens.array = chars_split(source, ' ', &tokens.length);
-    printf(">> %d\n", tokens.length);
+    if(options.verbose)
+		printf(">> %d\n", tokens.length);
     while(i < tokens.length){
-        printf("> %s\n", tokens.array[i]);
+		if(options.verbose)
+			printf("%2d -> %s\n", i, tokens.array[i]);
         if(strcmp(tokens.array[i], "mov") == 0){
             opcode = 0;
             opnum  = 2;
@@ -62,26 +69,32 @@ char* assembler(char* source, int *len){
         } else if(strcmp(tokens.array[i], "str") == 0){
             opcode = 7 << 3;
             opnum  = 2;
+        } else if(strcmp(tokens.array[i], "push") == 0){
+            opcode = 2 << 2;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "pop") == 0){
+            opcode = 4 << 2;
+            opnum  = 1;
         } else if(strcmp(tokens.array[i], "jmp") == 0){
             opcode = 0x40;
             opnum  = 1;
         } else if(strcmp(tokens.array[i], "jeq") == 0){
-            opcode = 0x41;
-            opnum  = 1;
-        } else if(strcmp(tokens.array[i], "jne") == 0){
-            opcode = 0x42;
-            opnum  = 1;
-        } else if(strcmp(tokens.array[i], "jlt") == 0){
-            opcode = 0x43;
-            opnum  = 1;
-        } else if(strcmp(tokens.array[i], "jle") == 0){
             opcode = 0x44;
             opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jne") == 0){
+            opcode = 0x4c;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jlt") == 0){
+            opcode = 0x42;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jle") == 0){
+            opcode = 0x4e;
+            opnum  = 1;
         } else if(strcmp(tokens.array[i], "jgt") == 0){
-            opcode = 0x45;
+            opcode = 0x46;
             opnum  = 1;
         } else if(strcmp(tokens.array[i], "jge") == 0){
-            opcode = 0x46;
+            opcode = 0x4a;
             opnum  = 1;
         } else {
             opcode = 0;
@@ -94,6 +107,7 @@ char* assembler(char* source, int *len){
             break;
         case 1:
             strcpy(op1, tokens.array[++i]);
+            opcode |= argument_type(op1);
             out[i - 1] = opcode;
             out[i] = argument_trim(op1) & 0xff;
             break;
@@ -118,25 +132,40 @@ char* assembler(char* source, int *len){
         }
         ++i;
     }
-    printf(">> end\n");
+	if(options.verbose)
+		printf(">> end\n");
     *(len) = tokens.length;
     return out;
 }
 
 int main(int argc, char *argv[])
 {
-    int codelen, bytelen;
+    int codelen, bytelen, start = 0, len, i;
     FILE *outfile, *infile;
     char *bytecode, *code;
-    if(argc > 2){
-        printf("Loading from %s\n", argv[1]);
-        infile  = fopen(argv[1], "r");
-        outfile = fopen(argv[2], "wb");
-    } else {
-        printf("Falling back to defaults\n");
-        infile  = fopen("code.asm", "r");
-        outfile = fopen("data.bin", "wb");
-    }
+    options.verbose = 0;
+    switch(argc){
+	case 4:
+		start = 1;
+		len = strlen(argv[start]);
+		for(i = 0; i < len; i++){
+			switch(argv[start][i]){
+			case 'v': options.verbose = 1; break;
+			};
+		}
+	case 3:
+		if(options.verbose)
+			printf("Loading from %s\n", argv[start+1]);
+		infile  = fopen(argv[start + 1], "r");
+		outfile = fopen(argv[start + 2], "wb");
+		break;
+	default:
+		options.verbose = 1;
+		printf("Falling back to defaults\n");
+		infile  = fopen("code.asm", "r");
+		outfile = fopen("data.bin", "wb");
+		break;
+	}
     fseek(infile, 0, SEEK_END);
     codelen = ftell(infile);
     rewind(infile);
@@ -147,6 +176,7 @@ int main(int argc, char *argv[])
     bytecode = assembler(code, &bytelen);
     fwrite(bytecode, 1, bytelen, outfile);
     fclose(outfile);
-    puts("- written");
+    if(options.verbose)
+		puts("- written");
     return 0;
 }

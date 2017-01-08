@@ -3,3 +3,4 @@
 *.bin
 *.asm
 !code.asm
+fvm*
