@@ -1,17 +1,36 @@
 #include <stdio.h>
 
-// 000xxx
+
 #define OP_MOVRI 0x2
 #define OP_MOVRR 0x3
-// 001xxx
-#define OP_ADRII 0xc
-#define OP_ADRRI 0xe
-#define OP_ADRRR 0xf
-// 010xxx
-#define OP_SBRII 0x14
-#define OP_SBRRI 0x16
-#define OP_SBRRR 0x17
-// 101xxx
+
+#define OP_ADRII 0x4
+#define OP_ADRRI 0x6
+#define OP_ADRRR 0x7
+
+#define OP_SBRII 0xc
+#define OP_SBRRI 0xe
+#define OP_SBRRR 0xf
+
+#define OP_SLRII 0x14
+#define OP_SLRRI 0x16
+#define OP_SLRRR 0x17
+
+#define OP_SRRII 0x1c
+#define OP_SRRRI 0x1e
+#define OP_SRRRR 0x1f
+
+#define OP_ORRII 0x24
+#define OP_ORRRI 0x26
+#define OP_ORRRR 0x27
+
+#define OP_ANRII 0x2c
+#define OP_ANRRI 0x2e
+#define OP_ANRRR 0x2f
+
+#define OP_XORII 0x34
+#define OP_XORRI 0x36
+#define OP_XORRR 0x37
 
 // 011xxx
 #define OP_LDRI  0x1a
@@ -101,6 +120,7 @@ void vm_loop(){
                 op[1] = data[++pc];
                 registers[op[0]] = registers[op[1]];
                 break;
+// add
             case OP_ADRRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];
@@ -119,6 +139,7 @@ void vm_loop(){
                 op[2] = data[++pc];
                 registers[op[0]] = op[1] + op[2];
                 break;
+// sub
             case OP_SBRRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];
@@ -137,6 +158,102 @@ void vm_loop(){
                 op[2] = data[++pc];
                 registers[op[0]] = op[1] - op[2];
                 break;
+// shift left
+            case OP_SLRII:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = op[1] << op[2];
+                break;
+            case OP_SLRRI:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] << op[2];
+                break;
+            case OP_SLRRR:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] << registers[op[2]];
+                break;
+// shift right
+            case OP_SRRII:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = op[1] >> op[2];
+                break;
+            case OP_SRRRI:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] >> op[2];
+                break;
+            case OP_SRRRR:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] >> registers[op[2]];
+                break;
+// or
+            case OP_ORRII:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = op[1] | op[2];
+                break;
+            case OP_ORRRI:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] | op[2];
+                break;
+            case OP_ORRRR:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] | registers[op[2]];
+                break;
+// and
+            case OP_ANRII:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = op[1] & op[2];
+                break;
+            case OP_ANRRI:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] & op[2];
+                break;
+            case OP_ANRRR:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] & registers[op[2]];
+                break;
+// xor
+            case OP_XORII:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = op[1] ^ op[2];
+                break;
+            case OP_XORRI:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] ^ op[2];
+                break;
+            case OP_XORRR:
+                op[0] = data[++pc];
+                op[1] = data[++pc];
+                op[2] = data[++pc];
+                registers[op[0]] = registers[op[1]] ^ registers[op[2]];
+                break;
+// load
             case OP_LDRI:
                 op[0] = data[++pc];
                 op[1] = data[++pc];

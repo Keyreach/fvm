@@ -33,10 +33,25 @@ char* assembler(char* source, int *len){
             opcode = 0;
             opnum  = 2;
         } else if(strcmp(tokens.array[i], "add") == 0){
-            opcode = 1 << 3;
+            opcode = 1 << 2;
             opnum  = 3;
         } else if(strcmp(tokens.array[i], "sub") == 0){
-            opcode = 2 << 3;
+            opcode = 3 << 2;
+            opnum  = 3;
+        } else if(strcmp(tokens.array[i], "shl") == 0){
+            opcode = 5 << 2;
+            opnum  = 3;
+        } else if(strcmp(tokens.array[i], "shr") == 0){
+            opcode = 7 << 2;
+            opnum  = 3;
+        } else if(strcmp(tokens.array[i], "or") == 0){
+            opcode = 9 << 2;
+            opnum  = 3;
+        } else if(strcmp(tokens.array[i], "and") == 0){
+            opcode = 0xB << 2;
+            opnum  = 3;
+        } else if(strcmp(tokens.array[i], "xor") == 0){
+            opcode = 0xD << 2;
             opnum  = 3;
         } else if(strcmp(tokens.array[i], "ldr") == 0){
             opcode = 3 << 3;
@@ -94,7 +109,7 @@ char* assembler(char* source, int *len){
             strcpy(op1, tokens.array[++i]);
             strcpy(op2, tokens.array[++i]);
             strcpy(op3, tokens.array[++i]);
-            opcode |= argument_type(op1) << 2 | argument_type(op2) << 1 | argument_type(op3);
+            opcode |= argument_type(op2) << 1 | argument_type(op3);
             out[i - 3] = opcode;
             out[i - 2] = argument_trim(op1) & 0xff;
             out[i - 1] = argument_trim(op2) & 0xff;
