@@ -1,12 +1,14 @@
 CC = gcc
+VM_O = fvm.o
+ASM_O = fvm_asm.o chars.o
 
 all : vm asm
 
-vm : fvm.o
-	$(CC) -o fvm fvm.o
+vm : $(VM_O)
+	$(CC) -o fvm $(VM_O)
 
-asm : fvm_asm.o chars.o
-	$(CC) -o fvm_asm fvm_asm.o chars.o
+asm : $(ASM_O)
+	$(CC) -o fvm_asm $(ASM_O)
 	
 fvm.o : fvm.c
 	$(CC) -c fvm.c
@@ -18,4 +20,4 @@ chars.o : chars.c chars.h
 	$(CC) -c chars.c
 	
 clean:
-	rm fvm fvm_asm fvm.o fvm_asm.o chars.o
+	rm fvm fvm_asm *.o

@@ -47,11 +47,26 @@ char* assembler(char* source, int *len){
         } else if(strcmp(tokens.array[i], "str") == 0){
             opcode = 7 << 3;
             opnum  = 2;
+        } else if(strcmp(tokens.array[i], "jmp") == 0){
+            opcode = 0x40;
+            opnum  = 1;
         } else if(strcmp(tokens.array[i], "jeq") == 0){
             opcode = 0x41;
             opnum  = 1;
         } else if(strcmp(tokens.array[i], "jne") == 0){
             opcode = 0x42;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jlt") == 0){
+            opcode = 0x43;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jle") == 0){
+            opcode = 0x44;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jgt") == 0){
+            opcode = 0x45;
+            opnum  = 1;
+        } else if(strcmp(tokens.array[i], "jge") == 0){
+            opcode = 0x46;
             opnum  = 1;
         } else {
             opcode = 0;

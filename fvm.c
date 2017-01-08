@@ -23,8 +23,13 @@
 #define OP_CMPRI 0x22
 #define OP_CMPRR 0x23
 // 1000xxx
+#define OP_JMP 0x40
 #define OP_JEQ 0x41
 #define OP_JNE 0x42
+#define OP_JLT 0x43
+#define OP_JLE 0x44
+#define OP_JGT 0x45
+#define OP_JGE 0x46
 
 #define OP_STOP 0x0
 
@@ -81,9 +86,9 @@ void dump_registers(){
 }
 
 void vm_loop(){
-    int pc = 0;
+    int overload = 10000, pc = 0;
     char op[3] = {0, 0, 0};
-    while(data[pc] != OP_STOP){
+    while((data[pc] != OP_STOP) && overload){
         printf(".");
         switch(data[pc]){
             case OP_MOVRI:
@@ -184,6 +189,10 @@ void vm_loop(){
                 else
                     flags.lt = 0;
                 break;
+            case OP_JMP:
+                op[0] = data[++pc];
+                pc = op[0] - 1;
+                break;
             case OP_JEQ:
                 op[0] = data[++pc];
                 if(flags.eq == 1)
@@ -194,12 +203,36 @@ void vm_loop(){
                 if(flags.eq == 0)
                     pc = op[0] - 1;
                 break;
+            case OP_JLT:
+                op[0] = data[++pc];
+                if(flags.lt == 1)
+                    pc = op[0] - 1;
+                break;
+            case OP_JGT:
+                op[0] = data[++pc];
+                if(flags.gt == 1)
+                    pc = op[0] - 1;
+                break;
+            case OP_JLE:
+                op[0] = data[++pc];
+                if(flags.gt == 0)
+                    pc = op[0] - 1;
+                break;
+            case OP_JGE:
+                op[0] = data[++pc];
+                if(flags.lt == 0)
+                    pc = op[0] - 1;
+                break;
             default:
                 printf("!");
         }
         ++pc;
+        --overload;
 	}
-	printf("\nEnded at %d\n", pc);
+	if(overload)
+		printf("\nEnded at %d\n", pc);
+	else
+		printf("\nEmergency exit\n");
 }
 
 int main(int argc, char *argv[]){
